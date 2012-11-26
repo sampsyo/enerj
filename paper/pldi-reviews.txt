@@ -1,0 +1,324 @@
+===========================================================================
+                          PLDI 2011 Review #216A
+                 Updated Tuesday 4 Jan 2011 9:37:07pm CST
+---------------------------------------------------------------------------
+  Paper #216: EnerJ: Approximate Data Types for Safe and General Low-Power
+              Computation
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Accept
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+The paper describes EnerJ, a language extension to Java that allows programmers
+to distinguish between precise and approximate data computations and representations.
+Depending on the level of approximation (mild, medium, aggressive), hardware settings
+can be selected that take less energy, but may result in incorrect results. The EnerJ
+system targets this tradeoff between energy consumption and fidelity (accuracy).
+
+EnerJ uses type-based information-flow tracking to allow users to specify program data
+for which a degradation in accuracy is acceptable. Based on the user-provided type annotations, the
+system ensures that approximate and precise computations do not interfere. In cases where
+approximate information is used to determine precise information (e.g.: approx. info as part of
+a conditional statement that assigns a precise value), explicit user-supplied "endorsement" annotations are
+required similar to "casting". The system also allows the selection of user-defined approximate operations (methods)
+based on the modified type system (precise and approx types).
+
+A prototype system has been implemented and evaluated on several programs through simulation. 
+The results indicate energy savings up to 50% with only small to moderate impact on program
+result accuracy.
+
+            ===== Area of the paper (List all that apply) =====
+
+2 3 10 11 13 15 19
+
+              ===== Evaluation and comments for author =====
+
+I like the paper quite a bit. It addresses the important problem of energy savings vs. accuracy tradeoffs
+at the language level. Such tradeoffs are a semantic issue, i.e., cannot be determined automatically by a 
+compiler or runtime system without user input. The evaluation of the system focuses on exploiting
+hardware features of the target architecture for energy reductions, such as voltage scaling, FP operation 
+width, and DRAM refresh rate. All experimental results were based on simulation using a simulation environment 
+developed by the authors. Quite a few assumptions had to be made in order to produce the experimental results.
+Although all these assumptions seem reasonable, it is not clear how even slight changes in these 
+assumptions would have influenced the experimental results. 
+
+I am missing an attempt to physically evaluate the benefits of the
+proposed framework by measuring actual observed energy benefits and
+accuracy tradeoffs. Some of the techniques as discussed in Section 4.2
+can be controlled in current architectures. A few actual numbers would have given much more 
+credibility to the proposed strategy and the presented results.
+
+The experimental evaluation assumes an CPU/memory energy budget
+distribution of a server. As stated in the paper, the energy budget 
+distribution for mobile devices is significantly different. How different 
+would your results be if you had chosen a mobile-device energy distribution?
+
+              ===== Comments to address in the response =====
+
+Why was there no attempt to physically evaluate some of the techniques
+discussed in Section 4.2?
+
+The presented results do not include the potential of energy optimizations due to 
+changes through algorithmic approximations, correct?
+
+===========================================================================
+                          PLDI 2011 Review #216B
+                 Updated Saturday 8 Jan 2011 8:54:51pm CST
+---------------------------------------------------------------------------
+  Paper #216: EnerJ: Approximate Data Types for Safe and General Low-Power
+              Computation
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Accept
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+The paper presents a language-based approach for approximate data types: Variables that are marked as approximate can be executed on hardware that may fail or produce imprecise results. Ideas from type-based information flow checking are applied to guarantee that approximate values are not "leaking" into precise code without the programmer's explicit consent.
+
+            ===== Area of the paper (List all that apply) =====
+
+Static analysis, Optimization, Language Design.
+
+              ===== Evaluation and comments for author =====
+
+You introduce the @Top qualifier, but never show what it is used for and why it is necessary. What does it mean when a variable is annotated with @Top? There is no representation for that because a value is either precise or approximate on the hardware. When you used @Top in your case studies, present a good example for it.
+
+Late in the paper you mention that you don't have approximate pointers, but I was asking myself that question already on page 2. You should make it clear earlier that neither a pointer nor an instance can be approximate, but only the primitive fields of an instance.
+
+Are relational operators, especially "==" and "!=", useful at all for approximate values? Not only when used in a condition, it might give the programmer a false sense of precision.
+
+Section 3 (Formal Semantics) does not fit the rest of the paper. It is not clear what the formal definition of FEnerJ contributes: You define the formal semantics of a language that is considerably different from what is presented in the rest of the paper. For example, the formal semantics don't have "Approximable" classes, and it introduces the new qualifier "lost". Since it was not clear for me why "top" is necessary at all, I also don't see a reason to have "lost"; the whole section has no semantic rules that produce "top" or "lost" values. You say that you can read a field with "lost" precision, but that field cannot be updated. Besides the fact that I don't know how such a value should be represented in memory (your implementation does not mention it), that would mean that a field store produces an error at run time (a situation that you want to prevent). In summary, I think the whole section should be completely removed from the paper.
+
+Approximate values are defined as having "no guarantees". Is that definition useful in practice? The runtime system is then allowed to replace all approximate values with constants instead of actually performing approximate operations - thus making it hard to show that an approximate program is correct. How do you prevent that the runtime system "cheats" and constant-folds all approximate computations to "42"? How can you ensure that an actual execution yields a better result than "42"? While the discussion of that is certainly not the topic of this paper, I would like to see more than just the "no guarantee" sentence.
+
+Related to that, how do you think that approximate computations can be tested? Discussing these and other problems that arise from approximations would increase the value of the paper.
+
+Section 6: "even pixel coordinates are marked as precise". That doesn't make sense, should "precise" be replaced by "approximate"?
+
+the sentence "...method called on a may be..." misses some words
+
+===========================================================================
+                          PLDI 2011 Review #216C
+                 Updated Monday 10 Jan 2011 1:03:37pm CST
+---------------------------------------------------------------------------
+  Paper #216: EnerJ: Approximate Data Types for Safe and General Low-Power
+              Computation
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Accept
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+The paper explores a way of producing energy-efficient programs by
+safely allowing certain parts of the program to potentially produce
+inaccurate results.
+
+The approach is motivated by two observations: that some (parts of)
+applications have a high tolerance to transient faults, and that there
+are known hardware techniques for saving energy at the cost of losing
+accuracy.
+
+The main contribution of the paper is the design and implementation of
+the EnerJ programming language, an extension of Java with type
+qualifiers that allow declaring data as approximate or
+precise. Approximate data can be stored in an approximate way and
+computations involving such data are allowed to be performed
+approximately (in both cases, saving energy at the price of less
+reliably). The authors propose a type system for approximate
+computation based on type qualifiers and provide a formal semantics
+for EnerJ.  The type system can statically prove isolation of the
+precise program parts of the program from the approximate ones,
+guarantying that there is no information flow from approximate data to
+precise data (which would affect correction of the program).  Thus,
+run time checks are not needed for this purpose, which is also a way
+of saving energy. The EnerJ language also supports endorsements, a way
+to express allowed data flow from approximate data to precise data.
+In addition, EnerJ provides program constructors for defining
+approximate and precise implementations for a given method/algorithm
+(which will be applied to approximate and precise data accordingly.
+
+Thus, the proposed approach allows the programmer (at source level) to
+distinguish critical (precise) from non-critical (approximate)
+computations, and is safe in that it statically ensures that
+approximate data and computation do not affect precise ones (in
+absence of endorsements).
+
+Once a program is annotated for approximation, it is the
+responsibility of the runtime system or architecture to choose among
+several (hardware) approximate techniques for saving energy. The
+authors have implemented a simulator of a generic runtime system using
+data taken from the literature and experimented with several
+applications.  They present experimental results studying what
+percentage of annotations can result in good energy savings with
+little accuracy loss.
+
+            ===== Area of the paper (List all that apply) =====
+
+3, 10, 11, 17, 19, 20, 
+21 (Energy optimization)
+
+              ===== Evaluation and comments for author =====
+
+The main contributions of the paper are the design and implementation
+of the EnerJ programming language, extending Java with the appropriate
+type qualifiers, the formalization of the proposed type system and the
+semantics for EnerJ, and the proof that the static type checking
+ensures the non-interference property in absence of endorsements
+(i.e., that approximate data and computation do not affect the precise
+part).
+
+The paper is very well written, clear, with illustrative examples, and
+appears to be technically correct.  As pointed out by the authors, the
+observation that some applications are highly tolerant to transient
+faults is not new and there are also previous proposals of (low-level)
+languages that trade off correctness for power savings but, to the
+extent of my knowledge, the paper is novel being data-centric as
+opposed to code-centric, as in other proposals, and, specially, in
+providing static (type-based) safety guarantees (as opposed to dynamic
+ones, as in the Green language).  While this is not a complex result
+in light of previous work on type-based information flow analysis
+(referenced by the authors) it is nevertheless a useful and well
+worked out application.
+
+The evaluation of the approach using the implemented runtime system
+emulator and energy model helps in suggesting that a low percentage of
+annotations can result in good energy savings with little accuracy
+loss. 
+
+
+Other comments:
+
+As the authors mention in passing, the annotation process could
+perhaps be automated (or support could be provided for the automation
+of some parts). This could be a good future research direction.
+
+Although the data used in the emulator are taken from different
+studies in the literature (and it fits one's intuition), it would
+obviously be better to perform the evaluation in a real architecture
+applying the proposed energy saving optimizations, but we understand
+the difficulty in doing this.
+
+===========================================================================
+                          PLDI 2011 Review #216D
+                 Updated Friday 14 Jan 2011 4:47:51pm CST
+---------------------------------------------------------------------------
+  Paper #216: EnerJ: Approximate Data Types for Safe and General Low-Power
+              Computation
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Accept
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+There has been promising recent work---stemming from the observation
+that systems spend a significant amount of energy guaranteeing
+correctness---that seeks to exploit energy-accuracy trade-offs in
+general purpose programs.  However, to allow programs to function
+correctly even as energy consumption is reduced, it would help to know
+which parts of an application can tolerate inaccuracies (approximate
+storage and computation) and which parts must be kept precise.
+
+This paper presents EnerJ, a language that extends Java with type
+qualifiers that distinguish between approximate and precise data
+types.  (This is analogous to low and high integrity data in type
+systems that track information flow.)  Data that a programmer has
+annotated as "approximate" can be stored and computed with
+approximately, allowing for the possibility of energy savings.  The
+programmer must explicitly "endorse" approximate-to-precise data
+flow. These ideas are formalized in a core calculus that the authors
+have proved is sound and satisfies non-interference in the absence of
+endorsements.  This non-interference property guarantees that precise 
+state is not corrupted/tainted by approximate data. 
+
+The authors also propose a hardware architecture with explicit
+approximate storage and operations and build a simulator with these
+facilities that uses various techniques from the literature to save
+energy.  They demonstrate the promise of their approach by porting
+several applications to EnerJ and showing that with a small number of
+annotations they can achieve significant energy savings with little
+impact on accuracy.
+
+            ===== Area of the paper (List all that apply) =====
+
+10.	Language design
+11.	Object-oriented
+14.	Performance analysis
+15.	Programing models
+19.	Types
+
+              ===== Evaluation and comments for author =====
+
+I like the fact that this paper uses well known ideas from information
+flow security in an entirely different setting---that is, to develop a
+programming model where precise portions of the program are unaffected
+by approximate data and computation, and the separation of approximate
+and precise can be relied upon to achieve energy savings when
+manipulating approximate data.  The paper contains a pleasant mix of
+(1) language design (e.g., the use of @Approximable classes with
+@Context qualifiers and method overloading on the basis of precision
+via the _APPROX method naming convention); (2) formal semantics and
+proofs of critical properties (type soundness and non-interference);
+and (3) evaluation of the energy-accuracy tradeoff, annotation burden,
+and energy savings possible for a variety of applications ported to
+EnerJ.
+
+There are two issues that I feel are somewhat simplistically handled,
+and which, I hope, can be dealt with better at some point in the
+future.
+
+The first has to do with method overloading based on precision
+(Section 2.5.2).  In Approximable classes, the programmer can provide
+two implementations of a method m:  one (m) that is called with the
+receiver has a precise type and the other (m_APPROX) that is called
+when the receiver has an approximate type.  But here, it is "the
+programmer's responsibility to ensure that the two implementations are
+similar enough that they can be safely substituted."  That is, if we
+switch from using m_APPROX to using m, the program should not start to
+behave in a completely different manner.  It would be nice if we could
+devise a way to mechanically check that the methods are "similar
+enough".  What that requires, intuitively, is some sort of notion
+of "approximate behavioral subtyping". 
+
+The second issue is that the authors prove non-interference in the
+*absence of endorsements*.  Thus "endorse" is treated like an escape
+hatch.  Once the programmer has endorsed some approximate data, we no
+longer have any guarantees that the approximate data will not corrupt
+precise state (or that, if it does, this "corruption" will be benign
+or local and won't affect the behavior of the entire program).  By
+invoking endorse, the programmer assumes all responsibility for
+precise state being unaffected by approximate data---the latter is no
+longer guaranteed by a formal proof.  In any case, while this is
+somewhat unsatisfactory, it isn't fair to criticize the present paper
+for treating endorse in this way, especially since the
+information-flow community hasn't done too much better in terms of
+providing formal guarantees once an endorse or declassify is
+encountered in the code.  Also, it is indeed difficult to provide 
+such guarantees without significantly complicating the type system.
+But this could be an avenue to explore in the future. 
+
+Overall, this is a clear and well written paper.  The authors have
+developed a simple and elegant, type-based solution that can help with
+the critical goal of reducing the energy consumed by applications.  I 
+recommend that the paper be accepted.  
+
+
+Minor Comments
+--------------
+
+- pg 4, para on Subtyping: the "<:_{q}" notation is somewhat
+  confusing because the form of the judgment is: q <:_{q} q'.  So the
+  q on the left gets confused with the subscript q.  Perhaps
+  you could change the font of the "q" that you use as a subscript so
+  it's clear that the subscript is unrelated to the metavariable q on
+  the left-hand side. 
+
+- pg 4, Figure 1:  In this figure you use ":=" for field update.  But
+  then in the typing rules that appear on the rest of page 4 (under
+  the paragraphs on Context Adaptation and Type Rules, and again in
+  Section 3.2), you use "=" for field update.
+

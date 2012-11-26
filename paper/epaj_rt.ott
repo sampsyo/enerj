@@ -1,0 +1,585 @@
+metavar RAId  ::= {{ com raw address identifier }} {{ tex \mathit{[[RAId]]} }}
+metavar PrimV  ::= {{ com primitive value }} {{ tex \mathit{[[PrimV]]} }}
+
+
+grammar
+
+%%% ADDRESS IDENTIFIER %%%
+ii {{ tex \iota }} :: ii_ ::=
+        {{ com address identifier }}
+   |  RAId                  ::   :: def
+        {{ com raw address identifier }}
+   |  rG ( this )           :: M :: this
+        {{ com currently active object look-up }}
+        {{ tex [[rG]]\!\left([[this]]\right) }}
+   |  SomeII               :: M :: some
+        {{ com some address identifier }}
+        {{ tex \texttt{\_} }}
+
+%%% PRIMITIVE VALUE %%%
+pp {{ tex {^r}\!\mathcal{L} }} :: pp_ ::=
+        {{ com primitive value }}
+   |  zero            ::   :: zero
+        {{ com zero value }}
+   |  PrimV           ::   :: def
+        {{ com primitive value }}
+   |  pp0 + pp1              :: M :: binop
+        {{ com binary operation }}
+
+%%% PRIMITIVE VALUE %%%
+qpp {{ tex \rho_{q} }} :: qpp_ ::=
+        {{ com qualified primitive value }}
+   |  ( q , pp )           ::   :: def
+        {{ com qualified primitive value }}
+%        {{ tex \left([[q]], [[pp]]\right) }}
+        {{ tex ([[q]], [[pp]]) }}
+
+
+%%% ADDRESS IDENTIFIERS %%%
+iis {{ tex \overline{\iota} }} :: iis_ ::=
+        {{ com address identifiers }}
+   |  ii1 , .. , iin       ::   :: def
+        {{ com address identifier list }}
+   |  EmptyIIS             ::   :: empty
+        {{ com empty list }}
+        {{ tex \emptyset }}
+   |  SomeIIS              :: M :: some
+        {{ com some address identifier list }}
+        {{ tex \texttt{\_} }}
+   |  dom ( h )            :: M :: domh
+        {{ com domain of heap }}
+        {{ tex \mathrm{dom}\!\left( [[h]] \right) }}
+
+
+%%% VALUE %%%
+v {{ tex v }} :: v_ ::=
+        {{ com value }}
+   |  ii               ::   :: addrid
+        {{ com address identifier }}
+   |  nulla            ::   :: nulla
+        {{ com null value }}
+   |  qpp              ::   :: primvalue
+        {{ com qualified primitive value }}
+   |  SomeV            :: M :: some
+        {{ com some value }}
+        {{ tex \texttt{\_} }}
+   |  sim ( v )           ::   :: sim
+        {{ com similarity }}
+        {{ tex \tilde{[[v]]} }}
+        
+% Below used to be options
+   |  h ( ii . f )     :: M :: heapfieldlookup
+        {{ com field value look-up }}
+        {{ tex [[h]]\!\left([[ii]][[.]][[f]]\right) }}
+   |  rG ( x )         :: M :: arglookup
+        {{ com argument value look-up }}
+        {{ tex [[rG]]\!\left([[x]]\right) }}
+   |  fvs ( f )        :: M :: fieldvalue
+        {{ com field value look-up }}
+        {{ tex [[fvs]]\!\left( [[f]] \right) }}
+
+
+%%% VALUES %%%
+vs {{ tex \overline{v} }} :: vs_ ::=
+        {{ com values }}
+   |  v1 , .. , vn    ::   :: def
+        {{ com value list }}
+   |  EmptyVS         ::   :: empty
+        {{ com empty list }}
+        {{ tex \emptyset }}
+
+
+%%% FIELD VALUES %%%
+fvs {{ tex \overline{\mathit{fv} } }} :: fvs_ ::=
+        {{ com field values }}
+   |  f |-> v                ::   :: one
+        {{ com field [[f]] has value [[v]] }}
+   |  fvs1 , .. , fvsn        ::   :: many
+        {{ com field value list }}
+   |  SomeFields              :: M :: somefields
+        {{ com some field values }}
+        {{ tex \_ }}
+   |  h ( ii )2               :: M :: heapfieldslookup
+        {{ com look up field values in heap }}
+        {{ tex [[h]]\!\left([[ii]]\right)\!\!\downarrow_{2} }}
+   |  fvs [ f |-> v ]         :: M :: update
+        {{ com update existing field [[f]] to [[v]] }}
+        {{ tex [[fvs]]\!\left[ [[f]] [[|->]] [[v]] \right] }}
+
+
+%%% OBJECT %%%
+o :: obj_ ::=
+        {{ com object }}
+   |  ( T , fvs )     ::   :: def
+        {{ com type [[T]] and field values [[fvs]] }}
+        {{ tex \left([[T]], [[fvs]]\right) }}
+
+% Below used to be option
+   |  h ( ii )         :: M :: heapobjlookup
+        {{ com look up object in heap }}
+        {{ tex [[h]]\!\left( [[ii]] \right) }}
+
+
+%%% HEAP ENTRY %%%
+he {{ tex \mathit{he} }} :: he_  ::=
+        {{ com heap entry }}
+   |  ( ii |-> o )   ::  :: hec
+        {{ com address [[ii]] maps to object [[o]] }}
+        {{ tex \left([[ii]] [[|->]] [[o]]\right) }}
+
+
+%%% HEAP %%%
+h :: h_ ::=
+        {{ com heap }}
+   |  EmptyHeap               ::   :: empty
+        {{ com empty heap }}
+        {{ tex \emptyset }}
+   |  h + he                  ::   :: add
+        {{ com add [[he]] to [[h]], overwriting existing mappings }}
+   |  sim ( h )               ::   :: sim
+        {{ com similarity }}
+        {{ tex \tilde{[[h]]} }}
+
+
+%%% RUNTIME ENVIRONMENT %%%
+rG {{ tex \mathit{ {^r}\!\Gamma} }} :: rG_ ::=
+        {{ com runtime environment }}
+   |  rGC ( q ; rVE )        ::   :: compose
+        {{ com composition }}
+        {{ tex \left\{ [[q]]; [[rVE]] \right\} }}
+   |  rG ( q )               :: M :: update
+        {{ com update the precision in environment [[rG]] }}
+
+rVEP {{ tex {^{r}\delta_{p} } }} :: rVEP_ ::=
+        {{ com runtime variable environment parameter entry }}
+   |  pid |-> v                    ::   :: def
+        {{ com variable [[pid]] has value [[v]] }}
+        {{ tex [[pid]] [[|->]] [[v]] }}
+
+rVET {{ tex {^{r}\delta_{t} } }} :: rVET_ ::=
+        {{ com runtime variable environment entry for [[this]] }}
+   |  this |-> ii                   ::   :: def
+        {{ com variable [[this]] has address [[ii]] }}
+        {{ tex [[this]] [[|->]] [[ii]] }}
+
+rVE {{ tex {^{r}\delta} }} :: rVE_ ::=
+        {{ com runtime variable environment }}
+        {{ isa ParName \<rightharpoonup> Addr }}
+   |  rVET                        ::   :: this
+        {{ com mapping for [[this]] }}
+   |  rVET , SomeRVE              ::   :: thissome
+        {{ com mapping for [[this]] and some others }}
+        {{ tex [[rVET]], \texttt{\_} }}
+   |  rVET , rVEP1 , .. , rVEPk   ::   :: thismany
+        {{ com mappings list }}
+
+        
+%%% RUNTIME FORMULAS %%%
+rt_fmls {{ tex \overline{^{r}\!fml} }} :: rtfmls_ ::=
+        {{ com runtime formulas }}
+   |  h = h'                            ::   :: heapalias
+        {{ com heap alias }}
+   |  pp = pp'                          ::   :: primvaluealias
+        {{ com primitive value alias }}
+   |  pp != pp'                         ::   :: primvaluenotalias
+        {{ com primitive value not alias }}
+   |  pp in P                           ::   :: primvaluetype
+        {{ com primitive value has primitive type }}
+   |  v = v'                            ::   :: valuealias
+        {{ com value alias }}
+   |  v != v'                           ::   :: valuenotalias
+        {{ com value not alias }}
+   |  v =o v'                           ::   :: valueoptalias
+        {{ com value alias }}
+   |  o =o o'                           ::   :: objectoptalias
+        {{ com object alias }}
+   |  ii in iis                         ::   :: addrinaddrs
+        {{ com address in addresses }}
+   |  iis != iis'                       ::   :: addrsnotalias
+        {{ com addresses not aliased }}
+   |  ii notin iis                      ::   :: addrnotinaddrs
+        {{ com address not in addresses }}
+   |  f in dom( fvs )                   ::   :: finfs
+        {{ com field identifier [[f]] contained in domain of [[fvs]] }}
+        {{ tex [[f]] \in \mathrm{dom}\!\left( [[fvs]] \right) }}
+   |  x in rG                           ::   :: parinrenv
+        {{ com parameter in runtime environment }}
+        {{ isa [[x]] mem (snd [[rG]]) }}
+   |  rG = rG'                          ::   :: renvalias
+        {{ com runtime environment alias }}
+   |  fvs = fvs'                        ::   :: fsalias
+        {{ com fields alias }}
+
+        
+%--------------------------------------------------------------------------------------------------------
+
+defns
+rt_helpers  :: '' ::=
+
+defn
+h + o = ( h' , ii )         ::   :: creation :: hnew_
+        {{ com add object [[o]] to heap [[h]] resulting in heap [[h']] and fresh address [[ii]] }}
+        {{ tex [[h]] + [[o]]\ =\ \left([[h']], [[ii]]\right) }}
+by
+
+ii notin dom(h)   AND   h' = h + (ii |-> o)
+--------------------------------------------------- :: def
+h + o = (h', ii)
+
+
+defn
+h [ ii . f := v ] =o h'        ::   :: update   :: hup_
+        {{ com field update in heap }}
+        {{ tex [[h]]\!\left[ [[ii]][[.]][[f]]\ [[:=]]\ [[v]] \right]\ [[=o]]\ [[h']] }}
+by
+
+v=nulla  \/  (v=ii' /\ :rtfmls_addrinaddrs: ii' in dom(h))
+h(ii) =o (T, fvs)   AND   :formula_topand: f in dom(fvs)  AND  fvs' = fvs[ f|->v ]
+h' = h + (ii |-> (T, fvs'))
+---------------------------------------------------------------------------------------- :: refT
+h[ii.f := v] =o h'
+
+
+h(ii) =o (T, fvs)  AND  fvs(f)=(q', pp')  
+fvs' = fvs[ f|->(q', pp) ]  AND  h' = h + (ii |-> (T, fvs'))
+---------------------------------------------------------------------------------------- :: primT
+h[ii.f := (q, pp)] =o h'
+
+
+
+defn
+sTrT ( Prg , h , ii , T ) = T'  :: :: sT_rT :: sTrT_
+        {{ com convert type [[T]] to its runtime equivalent [[T']] }}
+        {{ tex \mathrm{sTrT}\!\left([[h]], [[ii]], [[T]]\right)\ [[=]]\ [[T']] }}
+by
+
+q = context  => q'=TQual(h(ii)1)
+q != context => q'=q
+--------------------------------------------- :: refT
+sTrT(Prg, h, ii, q C) = q' C
+
+q = context  => q'=TQual(h(ii)1)
+q != context => q'=q
+--------------------------------------------- :: primT
+sTrT(Prg, h, ii, q P) = q' P
+
+
+defn
+Prg , h , ii |- v : T    :: :: rttyping  :: rtt_
+        {{ com type [[T]] assignable to value [[v]] }}
+        {{ tex [[h]], [[ii]]\ [[|-]]\ [[v]]\ [[:]]\ \ [[T]] }}
+by
+
+sTrT(Prg, h, ii0, q C) = q' C
+h(ii)1 =o T1   AND   Prg |- T1 <: q' C
+------------------------------------------ :: addr
+Prg, h, ii0 |- ii : q C
+
+
+% TODO: T OK?
+------------------------------- :: null
+Prg, h, ii0 |- nulla : q C
+
+
+% I'm not quite sure what the nicest way is to write this rule.
+% Maybe making a case distinction on q' is easier, but like
+% this we are more similar to the addr rule.
+
+sTrT(Prg, h, ii0, q' P) = q'' P
+pp in P  AND  Prg |- q P <: q'' P
+% TODO: should we use subtyping or <:q?
+% one allows precise <: approx, the other doesn't
+------------------------------------------ :: primT
+Prg, h, ii0 |- (q, pp) : q' P
+
+
+defn
+Prg , h , ii |-m vs : Ts  :: :: rtsttypings :: rtts_
+        {{ com types [[Ts]] assignable to values [[vs]] }}
+        {{ tex [[h]], [[ii]]\ [[|-m]]\ [[vs]]\ [[:]]\ \ [[Ts]] }}
+by
+
+</ Prg, h, ii |- vi : Ti //i/>
+-------------------------------------------------------- :: def
+Prg, h, ii |-m </ vi //i/> : </ Ti //i/>
+
+
+defn
+rFType ( Prg , h , ii , f ) =o T   ::   :: rftype :: rft_
+        {{ com look up type of field in heap }}
+        {{ tex \mathrm{FType}\!\left([[h]], [[ii]], [[f]]\right)\ [[=o]]\ [[T]] }}
+by
+
+Prg, h, ii |- ii : q C   AND   sFType(Prg, q C, f) =o T
+------------------------------------------------------------------ :: def
+rFType(Prg, h, ii, f) =o T
+
+        
+defn
+rMSig ( Prg , h , ii , m ) =o ms   :: :: rmsign :: rms_
+        {{ com look up method signature of method [[m]] at [[ii]] }}
+        {{ tex \mathrm{MSig}\!\left([[h]], [[ii]], [[m]]\right)\ [[=o]]\ [[ms]] }}
+by
+
+Prg, h, ii |- ii : q C   AND   sMSig(Prg, q C, m) =o ms
+------------------------------------------------------------------ :: def
+rMSig(Prg, h, ii, m) =o ms
+
+
+% TODO: resolution of q
+defn
+sMBody ( Prg , C , m , q ) =o e  :: :: smbodyc :: smbc_
+        {{ com look up most-concrete body of [[m]], [[q]] in class [[C]] or a superclass }}
+        {{ tex \mathrm{MBody}\!\left([[C]], [[m]], [[q]]\right)\ [[=o]]\ [[e]] }}
+by
+
+class Cid extends SomeC { SomeFDs SomeMDs ms { e } SomeMDs } in Prg
+sMName(ms) = m  /\  MQual(ms) = q
+---------------------------------------------------------------------- :: found
+sMBody(Prg, Cid, m, q) =o e
+
+
+class Cid extends C1 { SomeFDs </ msn { en } //n/> } in Prg
+</ sMName(msn) != m //n/>   AND   sMBody(Prg, C1, m, q) =o e
+---------------------------------------------------------------------- :: inh
+sMBody(Prg, Cid, m, q) =o e
+
+
+defn
+rMBody ( Prg , h , ii , m ) =o e  :: :: rmbody :: rmb_
+        {{ com look up most-concrete body of method [[m]] at [[ii]] }}
+        {{ tex \mathrm{MBody}\!\left([[h]], [[ii]], [[m]]\right)\ [[=o]]\ [[e]] }}
+by
+
+h(ii)1 =o precise C   AND   sMBody(Prg, C, m, precise) =o e
+------------------------------------------------------------------- :: call1
+rMBody(Prg, h, ii, m) =o e
+
+
+h(ii)1 =o approx C   AND   sMBody(Prg, C, m, approx) =o e
+------------------------------------------------------------------- :: call2
+rMBody(Prg, h, ii, m) =o e
+
+
+h(ii)1 =o approx C   AND   sMBody(Prg, C, m, approx) =o NoneExp
+sMBody(Prg, C, m, precise) =o e
+------------------------------------------------------------------- :: call3
+rMBody(Prg, h, ii, m) =o e
+
+
+
+defn
+FVsInit ( Prg , qC ) = fvs  :: :: fvsinit :: fvsi_
+        {{ com initialize the fields for reference type [[qC]] }}
+        {{ tex \mathrm{FVsInit}\!\left([[qC]]\right)\ [[=]]\ [[fvs]] }}
+by
+
+q in {precise, approx}
+ALL f in refFields(Prg, C). fvs(f) =o nulla
+ALL f in primFields(Prg, C). (sFType(Prg, q C, f) =o q' P  /\  fvs(f) =o (q', zero))
+-------------------------------------------------------------------------------------- :: def
+FVsInit(Prg, q C) = fvs
+
+
+
+%--------------------------------------------------------------------------------------------------------
+
+defns 
+semantics :: '' ::= 
+
+
+defn
+Prg , rG |- h , e : h' , v :: :: semantics :: os_
+        {{ com big-step operational semantics }}
+        {{ tex [[rG]]\ [[|-]]\ [[h]], [[e]]\ \leadsto\ [[h']], [[v]] }}
+by
+
+
+------------------------------ :: null
+Prg, rG |- h, null : h, nulla
+
+
+------------------------------------------- :: literal
+Prg, rG |- h, lit : h, (precise, pp)
+
+
+rG(x) =o v
+------------------------- :: var
+Prg, rG |- h, x : h, v
+
+
+sTrT(Prg, h, rG(this), q C) = q' C
+FVsInit(Prg, q' C) = fvs
+h + (q' C, fvs) = (h', ii)
+--------------------------------------------- :: new
+Prg, rG |- h, new q C() : h', ii
+
+
+Prg, rG |- h, e0 : h', ii0  AND  h'(ii0.f) =o v
+% ii0 != nulla implied by type
+--------------------------------------------------- :: read
+Prg, rG |- h, e0.f : h', v
+
+
+Prg, rG |- h, e0 : h0, ii0  AND  Prg, rG |- h0, e1 : h1, v
+% ii0 != nulla implied by type
+h1[ ii0.f := v ] =o h'
+--------------------------------------------------------------- :: write
+Prg, rG |- h, e0.f := e1 : h', v
+
+
+Prg, rG |- h, e0 : h0, ii0  AND  Prg, rG |-m h0, </ ei //i/> : h1, </ vi //i/>
+rMBody(Prg, h0, ii0, m) =o e   AND   rMSig(Prg, h0, ii0, m) =o SomeT m( </ SomeT pidi //i/> ) q
+rG' = rGC( precise; this |-> ii0, </ pidi |-> vi //i/> )
+Prg, rG' |- h1, e : h', v
+----------------------------------------------------------------------------------------------------- :: call
+Prg, rG |- h, e0.m( </ ei //i/> ) : h', v
+
+
+Prg, rG |- h, e : h', v
+Prg, h', rG(this) |- v : q C
+------------------------------------ :: cast
+Prg, rG |- h, (q C) e : h', v
+
+
+% TODO: allow mixing here, and more strict in the checked OS?
+Prg, rG |- h, e0 : h0, (q, pp0)
+Prg, rG |- h0, e1 : h', (q, pp1)
+---------------------------------------------------- :: primop
+Prg, rG |- h, e0 + e1 : h', (q, pp0 + pp1)
+
+
+Prg, rG |- h, e0 : h0, (q, pp) AND pp != zero
+Prg, rG |- h0, e1 : h', v
+---------------------------------------------------- :: cond_t
+Prg, rG |- h, if ( e0 ) { e1 } else { e2 } : h', v 
+
+Prg, rG |- h, e0 : h0, (q, zero) AND Prg, rG |- h0, e2 : h', v
+---------------------------------------------------- :: cond_f
+Prg, rG |- h, if ( e0 ) { e1 } else { e2 } : h', v 
+
+
+Prg, rG |- h, e : h', v  AND  h' cong sim(h')  AND  v cong sim(v)
+------------------------------------------------------------------- :: approx
+Prg, rG |- h, e : sim(h'), sim(v)
+
+
+
+defn
+Prg , rG |-m h , es : h' , vs :: :: semantics_many :: oss_
+        {{ com sequential big-step operational semantics }}
+        {{ tex [[rG]]\ [[|-]]\ [[h]], [[es]]\ \leadsto\ [[h']], [[vs]] }}
+by
+
+Prg, rG |- h, e : h0, v
+Prg, rG |-m h0, </ ei //i/> : h', </ vi //i/>
+----------------------------------------------------- :: def
+Prg, rG |-m h, e, </ ei //i/> : h', v, </ vi //i/>
+
+-------------------------------------------- :: empty
+Prg, rG |-m h, EmptyES : h, EmptyVS
+
+
+
+defn
+|- Prg : h , v :: :: semantics_prg :: osp_
+        {{ com big-step operational semantics of a program }}
+        {{ tex [[|-]]\ [[Prg]]\ \leadsto\ [[h]], [[v]] }}
+by
+
+FVsInit(Clss, C, e, precise C) = fvs
+EmptyHeap + (precise C, fvs) = (h0, ii0)
+rG0 = rGC( precise; this |-> ii0)   AND   Clss, C, e, rG0 |- h0, e : h, v
+------------------------------------------------------------------------------- :: def
+|- Clss, C, e : h, v
+
+
+defn
+Prg , rG |- h , e :c h' , v :: :: checkedsemantics :: cos_
+        {{ com checked big-step operational semantics }}
+        {{ tex [[rG]]\ [[|-]]\ [[h]], [[e]]\ \leadsto_{c}\ [[h']], [[v]] }}
+by
+
+Prg, rG |- h, null : h, nulla
+---------------------------------- :: null
+Prg, rG |- h, null :c h, nulla
+
+
+Prg, rG |- h, lit : h, (precise, pp)
+------------------------------------------- :: literal
+Prg, rG |- h, lit :c h, (precise, pp)
+
+
+Prg, rG |- h, x : h, v
+------------------------- :: var
+Prg, rG |- h, x :c h, v
+
+
+% TODO: it's not a problem to create a new precise object in an approximate context(?)
+Prg, rG |- h, new q C() : h', ii
+-------------------------------------------------------------------------------------------------- :: new
+Prg, rG |- h, new q C() :c h', ii
+
+
+Prg, rG |- h, e0 :c h', ii0
+Prg, rG |- h, e0.f : h', v
+-------------------------------- :: read
+Prg, rG |- h, e0.f :c h', v
+
+
+Prg, rG |- h, e0 :c h0, ii0  AND  h(ii0)1 = q C
+rG()1 = q'  AND  (q=q' \/ q'=precise)
+Prg, rG |- h0, e1 :c h1, v
+Prg, rG |- h, e0.f := e1 : h', v
+--------------------------------------------------- :: write
+Prg, rG |- h, e0.f := e1 :c h', v
+
+
+Prg, rG |- h, e0 :c h0, ii0  AND  Prg, rG |-m h0, </ ei //i/> :c h1, </ vi //i/>
+rMBody(Prg, h0, ii0, m) =o e   AND   rMSig(Prg, h0, ii0, m) =o SomeT m( </ SomeT pidi //i/> ) q
+rG' = rGC( precise; this |-> ii0, </ pidi |-> vi //i/> )
+Prg, rG' |- h1, e :c h', v
+Prg, rG |- h, e0.m( </ ei //i/> ) : h', v
+----------------------------------------------------------------------------------------------------- :: call
+Prg, rG |- h, e0.m( </ ei //i/> ) :c h', v
+
+
+Prg, rG |- h, e :c h', v
+Prg, rG |- h, (q C) e : h', v
+-------------------------------- :: cast
+Prg, rG |- h, (q C) e :c h', v
+
+
+Prg, rG |- h, e0 :c h0, (q, pp0)
+Prg, rG |- h0, e1 :c h', (q, pp1)
+Prg, rG |- h, e0 + e1 : h', (q, pp0 + pp1)
+---------------------------------------------------- :: primop
+Prg, rG |- h, e0 + e1 :c h', (q, pp0 + pp1)
+
+
+Prg, rG |- h, e0 :c h0, (q, pp)  AND  pp != zero
+rG' = rG(q)  AND Prg, rG' |- h0, e1 :c h', v
+Prg, rG |- h, if ( e0 ) { e1 } else { e2 } : h', v 
+---------------------------------------------------------- :: cond_t
+Prg, rG |- h, if ( e0 ) { e1 } else { e2 } :c h', v 
+
+Prg, rG |- h, e0 :c h0, (q, pp)  AND  pp = zero
+rG' = rG(q) AND Prg, rG' |- h0, e2 :c h', v
+Prg, rG |- h, if ( e0 ) { e1 } else { e2 } : h', v 
+---------------------------------------------------------- :: cond_f
+Prg, rG |- h, if ( e0 ) { e1 } else { e2 } :c h', v 
+
+
+defn
+Prg , rG |-m h , es :c h' , vs :: :: checkedsemantics_many :: coss_
+        {{ com checked sequential big-step operational semantics }}
+        {{ tex [[rG]]\ [[|-]]\ [[h]], [[es]]\ \leadsto_{c}\ [[h']], [[vs]] }}
+by
+
+Prg, rG |- h, e :c h0, v
+Prg, rG |-m h0, </ ei //i/> :c h', </ vi //i/>
+----------------------------------------------------- :: def
+Prg, rG |-m h, e, </ ei //i/> :c h', v, </ vi //i/>
+
+-------------------------------------------- :: empty
+Prg, rG |-m h, EmptyES :c h, EmptyVS

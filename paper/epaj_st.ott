@@ -1,0 +1,555 @@
+metavar f    ::=  {{ com field identifier }}
+metavar mid  ::=  {{ com method identifier }} {{ tex \mathit{mid} }}
+metavar pid  ::=  {{ com parameter identifier }} {{ tex \mathit{pid} }}
+metavar Cid  ::=  {{ com derived class identifier }} {{ tex \mathit{Cid} }}
+
+
+grammar
+
+%%% CLASS NAME %%%
+C :: C_ ::=
+        {{ com class name }}
+   |  Cid             ::   :: ClassId
+      {{ com derived class identifier}}
+   |  Object          ::   :: Object
+      {{ com name of base class }}
+   |  SomeC           :: M :: Some
+      {{ com some class name }}
+      {{ tex \texttt{\_} }}
+
+
+%%% PRIMITIVE TYPE NAMES %%%
+P :: P_ ::=
+        {{ com primitive type name }}
+   |  int             ::   :: int
+      {{ com integers }}
+   |  float           ::   :: float
+      {{ com floating-point numbers }}
+
+
+%%% PRECISION QUALIFIERS %%%
+q :: q_ ::=
+        {{ com precision qualifier }}
+   |  precise            ::   :: precise
+      {{ com precise }}
+      {{ tex \texttt{\upshape{precise}\,\!} }}
+   |  approx             ::   :: approx
+      {{ com approximate }}
+      {{ tex \texttt{\upshape{approx}\,\!} }}
+   |  top                ::   :: top
+      {{ com top }}
+      {{ tex \texttt{\upshape{top}\,\!} }}
+   |  context            ::   :: context
+      {{ com context }}
+      {{ tex \texttt{\upshape{context}\,\!} }}
+   |  lost               ::   :: lost
+      {{ com lost }}
+      {{ tex \texttt{\upshape{lost}\,\!} }}
+   |  TQual ( T )        :: M :: extractt
+      {{ com extract precision qualifier from type }}
+      {{ tex \mathrm{TQual}\!\left( [[T]] \right) }}
+   |  MQual ( ms )       :: M :: extractms
+      {{ com extract method qualifier from signature }}
+      {{ tex \mathrm{MQual}\!\left( [[ms]] \right) }}
+   |  rG ( )1            :: M :: env
+      {{ com extract environment qualifier }}
+      {{ tex [[rG]]\!\!\downarrow_{1} }}
+   
+%%% PRECISION QUALIFIERS %%%
+qs {{ tex \overline{q} }} :: qs_ ::=
+        {{ com precision qualfiers }}
+   |  q1 , .. , qn     ::   :: def
+        {{ com precision qualifier list }}
+   |  { qs }           :: M :: notation
+        {{ com notation }}
+        {{ tex \left\{ [[qs]] \right\} }}
+
+
+%%% QUALIFIED CLASS NAME %%%
+qC :: qC_ ::=
+        {{ com qualified class name }}
+   |  q C             ::   :: def
+      {{ com definition }}
+      {{ tex [[q]]\ [[C]] }}
+      
+%%% QUALIFIED PRIMITIVE TYPE %%%
+qP :: qP_ ::=
+        {{ com qualified primitive type }}
+   |  q P          ::   :: def
+      {{ com definition }}
+      {{ tex [[q]]\ [[P]] }}
+
+
+%%% TYPE %%%
+T {{ tex T }} :: T_ ::=
+        {{ com type }}
+   |  qC       ::   :: refT
+        {{ com reference type }}
+        {{ tex [[qC]] }}
+   |  qP       ::   :: primT
+        {{ com primitive type }}
+        {{ tex [[qP]] }}
+   |  SomeT           :: M :: some
+        {{ com some type }}
+        {{ tex \texttt{\_} }}
+   |  sG ( x )               :: M :: par_lookup
+        {{ com look up parameter type }}
+        {{ tex [[sG]]\!\left([[x]]\right) }}
+        % TODO: optional types again?
+   |  h ( ii )1        :: M :: heaptypelookup
+        {{ com look up type in heap }}
+        {{ tex [[h]]\!\left([[ii]]\right)\!\!\downarrow_{1} }}
+
+
+%%% TYPES %%%
+Ts {{ tex \overline{T} }} :: sTs_ ::=
+        {{ com types }}
+   |  T1 , .. , Tn                   ::   :: def
+        {{ com type list }}
+   |  Ts1 ++ Ts2                     ::   :: merge
+        {{ com two type lists }}
+        {{ tex [[Ts1]],\ [[Ts2]] }}
+   |  NoTs                             ::   :: none
+        {{ com no types }}
+        {{ tex \emptyset }}
+   |  SomeTs                           :: M :: some
+        {{ com some types }}
+        {{ tex \texttt{\_} }}
+
+
+%%% PROGRAM %%%
+Prg :: Prg_ ::=
+        {{ com program }}
+   |  Clss , C , e :: :: def
+      {{ tex [[Clss]],\ [[C]],\ [[e]] }}
+
+%%% CLASS DECLARATION %%%
+Cls {{ tex \mathit{Cls} }} :: Cls_ ::=  {{ com class declaration }}
+   | class Cid extends C { fds mds }  :: :: defg
+    {{ com class declaration }}
+    {{ tex [[class]]\ [[Cid]]\ [[extends]]\ [[C]]\ [[{]]\ [[fds]]\ [[mds]]\ [[}]] }}
+   | class Object { }     :: :: defo
+    {{ com declaration of base class }}
+    {{ tex [[class]]\ [[Object]]\ [[{]][[}]] }}
+
+%%% CLASS DECLARATIONS %%%
+Clss {{ tex \overline{\mathit{Cls} } }} :: Clss_ ::=
+    {{ com class declarations }}
+   |  Cls1 .. Clsn  :: :: def
+      {{ com class declaration list }}
+
+
+%%% FIELD DECLARATIONS %%%
+fds {{ tex \overline{ \mathit{fd} } }} :: fds_ ::=
+        {{ com field declarations }}
+   |  T f ;      ::   :: one
+      {{ com type [[T]] and field name [[f]] }}
+      {{ tex [[T]]\ [[f]][[;]] }}
+   |  fds1 .. fdsn  ::   :: many
+      {{ com field declaration list }}
+   |  SomeFDs       :: M :: some
+      {{ com some field declarations }}
+      {{ tex \texttt{\_} }}
+
+%%% LIST OF FIELD IDENTIFIERS %%%
+fs {{ tex \overline{f} }} :: fs_ ::=
+        {{ com list of field identifiers }}
+   |  f1 .. fn             ::   :: def
+      {{ com field identifier list }}
+   |  refFields ( Prg , C )     :: M :: ref
+      {{ com recursive reference type fields look-up }}
+      {{ tex \mathrm{refFields}\!\left([[C]]\right) }}
+   |  primFields ( Prg , C )     :: M :: prim
+      {{ com recursive primitive type fields look-up }}
+      {{ tex \mathrm{primFields}\!\left([[C]]\right) }}
+
+
+%%% EXPRESSION %%%
+e :: e_ ::=
+        {{ com expression }}
+   |  null                   ::   :: null
+      {{ com null expression }}
+   |  lit                    ::   :: literal
+      {{ com primitive literal }}
+   |  x                      ::   :: var
+      {{ com variable read }}
+   |  new qC ()              ::   :: new
+      {{ com object construction }}
+      {{ tex [[new]]\ [[qC]][[(]][[)]] }}
+   |  e . f                  ::   :: read
+      {{ com field read }}
+      {{ tex [[e]][[.]][[f]] }}
+   |  e0 . f := e1           ::   :: write
+      {{ com field write }}
+      {{ tex [[e0]][[.]][[f]]\ [[:=]]\ [[e1]] }}
+   |  e0 . m ( es )  ::   :: call
+      {{ com method call }}
+   |  ( qC ) e               ::   :: cast
+      {{ com cast }}
+      {{ tex [[(]][[qC]][[)]]\ [[e]] }}
+   |  e0 + e1                ::   :: primop
+      {{ com primitive operation }}
+   |  if ( e0 ) { e1 } else { e2 }  ::   :: cond
+      {{ com conditional }}
+      {{ tex [[if]]([[e0]])\ [[{]] [[e1]] [[}]]\ [[else]]\ [[{]] [[e2]] [[}]] }}
+   |  NoneExp                :: M :: none
+      {{ com no expression defined }}
+      {{ tex \textit{None} }}      
+
+
+%%% EXPRESSIONS %%%
+es {{ tex \overline{e} }} :: es_ ::=
+    {{ com expressions }}
+   |  e1 , .. , ek           :: :: def
+      {{ com list of expressions }}
+   |  EmptyES                ::   :: empty
+      {{ com empty list }}
+      {{ tex \emptyset }}
+
+
+%%% METHOD DECLARATION %%%
+md {{ tex \mathit{md} }} :: md_ ::=
+    {{ com method declaration }}
+   |  ms { e }    :: :: def
+      {{ com method signature and method body }}
+      {{ tex [[ms]] \ [[{]]\ [[e]]\ [[}]] }}
+
+
+%%% METHOD DECLARATIONS %%%
+mds {{ tex \overline{ \mathit{md} } }} :: mds_ ::=
+    {{ com method declarations }}
+   |  md             ::   :: one
+      {{ com method declaration }}
+   |  mds1 .. mdsn   ::   :: many
+      {{ com method declaration list }}
+   |  SomeMDs        :: M :: some
+      {{ com some method declarations }}
+      {{ tex \texttt{\_} }}
+
+%%% METHOD SIGNATURE
+ms :: ms_ ::=
+        {{ com method signature }}
+   |  T m ( mpds ) q   ::   :: def
+      {{ com method signature definition }}
+      {{ tex [[T]]\ [[m]][[(]] [[mpds]] [[)]]\ [[q]] }}
+   |  NoneMS           :: M :: none
+        {{ com no method signature defined }}
+        {{ tex \textit{None} }}
+
+
+%%% METHOD NAME %%%
+m  :: m_ ::= {{ com method name }}
+   |  mid             ::   :: def
+        {{ com method identifier }}
+   |  sMName ( ms )   :: M :: extract
+      {{ com extract method name from signature }}
+      {{ tex \mathrm{MName}\!\left( [[ms]] \right) }}
+
+
+%%% METHOD PARAMETER DECLARATIONS %%%
+mpds {{ tex \overline{\mathit{mpd} } }} :: mpds_ ::=
+        {{ com method parameter declarations }} 
+   |  T pid              :: :: one
+      {{ com type and parameter name }}
+      {{ tex [[T]]\ [[pid]] }}
+   |  mpds1 , .. , mpdsn  ::   :: many
+      {{ com list }}
+   |  SomeMPDs            :: M :: some
+      {{ com some method parameter declarations }}
+      {{ tex \texttt{\_} }}
+
+
+%%% PARAMETER NAME %%%
+x :: x_ ::=
+    {{ com parameter name }}
+   |  pid       ::  :: def
+      {{ com parameter identifier }}
+   |  this      ::  :: this
+      {{ com name of current object }}
+
+
+%--------------------------------------------------------------------------------------------------------
+
+%%% STATIC ENVIRONMENT %%%
+sG {{ tex \mathit{ {^s}\!\Gamma} }} :: sG_ ::=
+        {{ com static environment }}
+   |  sGC ( sVE )        :: :: compose
+        {{ com composition }}
+        {{ tex \left\{ [[sVE]] \right\} }}
+        
+sVEP {{ tex {^{s}\delta_{p} } }} :: sVEP_ ::=
+        {{ com static variable parameter environment }}
+   |  pid |-> T                       ::   :: one
+        {{ com variable [[pid]] has type [[T]] }}
+        {{ tex [[pid]] [[|->]] [[T]] }}
+
+sVET {{ tex {^{s}\delta_{t} } }} :: sVET_ ::=
+        {{ com static variable environment for [[this]] }}
+   |  this |-> T             ::   :: one
+        {{ com variable [[this]] has type [[T]] }}
+        {{ tex [[this]] [[|->]] [[T]] }}
+
+sVE {{ tex {^s}\delta }} :: sVE_ ::=
+        {{ com static variable environment }}
+   |  sVET                        ::   :: this
+        {{ com mapping for [[this]] }}
+   |  sVET , SomeVE               ::   :: thissome
+        {{ com mapping for [[this]] and some others }}
+        {{ tex [[sVET]], \texttt{\_} }}
+   |  sVET , sVEP1 , .. , sVEPi   ::   :: thismany
+        {{ com mappings list }}
+
+%--------------------------------------------------------------------------------------------------------
+        
+%%% STATIC FORMULAS %%%
+st_fmls {{ tex \overline{^{s}\!fml} }} :: stfmls_ ::=
+        {{ com static formulas }}
+   |  Prg = Prg'                   ::   :: prgalias
+        {{ com program alias }}
+   |  C = C'                       ::   :: classalias
+        {{ com class alias }}
+   |  T = T'                       ::   :: typealias
+        {{ com type alias }}
+   |  T =o T'                      ::   :: opttypealias
+        {{ com option type alias }}
+   |  q = q'                       ::   :: qualalias
+        {{ com qualifier alias }}
+   |  q != q'                      ::   :: qualnotalias
+        {{ com qualifier not alias }}
+   |  q in qs                      ::   :: qualcontainedquals
+        {{ com qualifier in set of qualifiers }}
+   |  q notin Ts                   ::   :: qualcontainedtypes
+        {{ com qualifier in set of types }}
+   |  m = m'                       ::   :: methalias
+        {{ com method name alias }}
+   |  m != m'                      ::   :: methnotalias
+        {{ com method name not alias }}
+   |  ms = ms'                     ::   :: methsigalias
+        {{ com method signature alias }}
+   |  sG = sG'                     ::   :: senvalias
+        {{ com static environment alias }}
+   |  e = e'                       ::   :: expalias
+        {{ com expression alias }}
+   |  Cls in Prg                   ::   :: cldelemP
+        {{ com class definition in program }}
+   |  class C in Prg               ::   :: partcldelemP
+        {{ com partial class definition in program }}
+        {{ tex [[class]]\ [[C]] \ldots \in [[Prg]] }}
+
+
+%--------------------------------------------------------------------------------------------------------
+
+defns 
+stsubxing :: '' ::= 
+
+
+defn
+q <:q q'  :: :: qorder :: qq_
+        {{ com ordering of precision qualifiers }}
+        {{ tex [[q]]\ [[<:q]]\ [[q']] }}
+by
+
+q != top
+------------------ :: lost
+q <:q lost
+
+------------------ :: top
+q <:q top
+
+------------------ :: refl
+q <:q q
+
+
+defn
+Prg |- C [= C' :: :: subclassing :: sc_
+           {{ com subclassing }}
+           {{ tex [[C]]\ \textsf{$\sqsubseteq$}\ [[C']] }}
+% using [[ [= ]] does not work
+by
+
+class Cid extends C' { SomeFDs SomeMDs } in Prg
+---------------------------------------------------- :: def
+Prg |- Cid [= C'
+
+
+class C in Prg
+---------------------------------------------------- :: refl
+Prg |- C [= C 
+
+
+Prg |- C [= C1  AND  Prg |- C1 [= C'
+---------------------------------------------------- :: trans
+Prg |- C [= C'
+
+
+defn
+Prg |- T <: T' :: :: subtyping :: st_
+        {{ com subtyping }}
+        {{ tex [[T]]\ [[<:]]\ \ [[T']] }}
+by
+
+q <:q q'  AND  Prg |- C [= C'
+---------------------------------------------------- :: refT
+Prg |- q C <: q' C'
+
+q <:q q'
+---------------------------------------------------- :: primT1
+Prg |- q P <: q' P
+
+---------------------------------------------------- :: primT2
+Prg |- precise P <: approx P
+
+
+defn
+Prg |-m Ts <: Ts' :: :: subtypings :: sts_
+        {{ com subtypings }}
+        {{ tex [[Ts]]\ [[<:]]\ \ [[Ts']] }}
+by
+
+</ Prg |- Ti <: Ti' //i/>
+----------------------------------------- :: def
+Prg |-m </ Ti //i/> <: </ Ti' //i/>
+
+
+
+defn
+Prg |- ms <: ms' :: :: methodsubtyping :: mst_
+        {{ com invocations of method [[ms]] can safely be replaced by calls to [[ms']] }}
+        {{ tex [[ms]]\ [[<:]]\ \ [[ms']] }}
+by
+
+% supermethod is more general than submethod
+
+Prg |- T' <: T  AND  Prg |-m </ Tk //k/> <: </ Tk' //k/>
+------------------------------------------------------------------------- :: def
+Prg |- T m(</ Tk pidk//k/>) precise <: T' m(</ Tk' pidk//k/>) approx 
+
+
+
+
+
+%--------------------------------------------------------------------------------------------------------
+
+defns 
+qcombdef :: '' ::=
+
+defn
+qcombq ( q , q' ) = q'' :: :: qcombqrules :: qcq_
+       {{ com combining two precision qualifiers }}
+       {{ tex [[q]]\, \rhd\, [[q']]\ \ [[=]]\ \ [[q'']] }}
+by
+
+q'=context /\ (q in {approx, precise, context})
+------------------------------------------------- :: context
+qcombq(q, q') = q
+
+
+q'=context /\ (q in {top, lost})
+------------------------------------------------- :: lost
+qcombq(q, q') = lost
+
+
+q'!=context
+------------------------------------------------- :: fixed
+qcombq(q, q') = q'
+
+
+
+defn
+qcombt ( q , T ) = T' :: :: qcombtrules :: qct_
+       {{ com precision qualifier - type combination }}
+       {{ tex [[q]]\, \rhd\, [[T]]\ \ [[=]]\ \ [[T']] }}
+by
+
+qcombq(q, q') = q''
+------------------------------------------ :: refT
+qcombt(q, q' C) = q'' C
+
+qcombq(q, q') = q''
+------------------------------------------ :: primT
+qcombt(q, q' P) = q'' P
+
+
+
+defn
+qcombts ( q , Ts ) =m Ts' :: :: qcombtsrules :: qcts_
+        {{ com precision qualifier - types combination }}
+        {{ tex [[q]]\, \rhd\, [[Ts]]\ \ [[=m]]\ \ [[Ts']] }}
+by
+
+</ qcombt(q, Tk) = Tk' //k/>
+---------------------------------------------- :: def
+qcombts(q, </ Tk //k/>) =m </ Tk' //k/>
+
+
+defn
+qcombms ( q , ms ) = ms' :: :: qcombmsrules :: qcms_
+        {{ com precision qualifier - method signature combination }}
+        {{ tex [[q]]\, \rhd\, [[ms]]\ \ [[=]]\ \ [[ms']] }}
+by
+
+qcombt(q, T) = T'  AND  qcombts(q, </ Tk //k/>) =m </ T'k //k/>
+-------------------------------------------------------------------- :: def
+qcombms(q, T m(</ Tk pidk//k/>) q') = T' m(</ Tk' pidk//k/>) q'
+% q' doesn't need to be adapted, can never be context
+
+
+
+
+%--------------------------------------------------------------------------------------------------------
+
+defns
+st_helpers :: '' ::=
+
+defn
+sFType ( Prg , C , f ) =o T :: :: sftypec :: sftc_
+        {{ com look up field [[f]] in class [[C]] }}
+        {{ tex \mathrm{FType}\!\left([[C]], [[f]]\right)\ [[=o]]\ [[T]] }}
+% TODO: option type
+by
+
+class Cid extends SomeC { SomeFDs T f; SomeFDs SomeMDs } in Prg
+-------------------------------------------------------------------- :: def
+sFType(Prg, Cid, f) =o T
+
+
+defn
+sFType ( Prg , qC , f ) =o T :: :: sftypet :: sftt_
+        {{ com look up field [[f]] in reference type [[qC]] }}
+        {{ tex \mathrm{FType}\!\left([[qC]], [[f]]\right)\ [[=o]]\ [[T]] }}
+by
+
+sFType(Prg, C, f) =o T1  AND  qcombt(q, T1) = T
+---------------------------------------------------- :: def
+sFType(Prg, q C, f) =o T
+
+
+defn
+sMSig ( Prg , C , m , q ) =o ms  :: :: smsigc :: smsc_
+        {{ com look up signature of method [[m]] in class [[C]] }}
+        {{ tex \mathrm{MSig}\!\left([[C]], [[m]], [[q]]\right)\ [[=o]]\ [[ms]] }}
+by
+
+class Cid extends SomeC { SomeFDs SomeMDs ms { e } SomeMDs } in Prg
+sMName(ms) = m  /\  MQual(ms) = q
+--------------------------------------------------------------------- :: def
+sMSig(Prg, Cid, m, q) =o ms
+
+
+defn
+sMSig ( Prg , qC , m ) =o ms   :: :: smsigt :: smst_
+        {{ com look up signature of method [[m]] in reference type [[qC]] }}
+        {{ tex \mathrm{MSig}\!\left([[qC]], [[m]]\right)\ [[=o]]\ [[ms]] }}
+by
+
+sMSig(Prg, C, m, q) =o ms  AND  qcombms(q, ms) = ms'
+--------------------------------------------------------------------- :: def
+sMSig(Prg, q C, m) =o ms'
+
+
+% The following doesn't work, as the type rule still uses subsumption and we wouldn't find the right method.
+% sMSig(Prg, C, m, approx) =o ms  =>  (qcombms(approx, ms) = ms')
+% (sMSig(Prg, C, m, approx) =o NoneMS  /\  sMSig(Prg, C, m, precise) =o ms) =>  (qcombms(precise, ms) = ms')
+% ----------------------------------------------------------------------------------------------------------- :: approx
+% sMSig(Prg, approx C, m) =o ms'
+

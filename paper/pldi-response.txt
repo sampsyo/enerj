@@ -1,0 +1,46 @@
+We thank the reviewers for their helpful comments. The majority of the comments
+will be simple to address in the paper. We respond to a few points here.
+
+> Energy savings in current hardware (reviews A and C)
+
+Two reviewers mentioned the potential advantage of measuring energy savings on
+current hardware. We agree that exploiting approximation strategies on commodity
+hardware and measuring the result would be useful research, but we also feel
+that the focus of this paper is on a portable, general, and high-level approach.
+It demonstrates that a wide range of hardware techniques for approximate
+execution, which are individually evaluated elsewhere, can exploit our language
+extensions.
+
+> Relevance of formalism (review B)
+
+One reviewer suggested that the FEnerJ formalism may be tangential to the
+paper's focus. We believe that the formalization provides a few important
+details about the language. Most prominently, it allows us to formally state and
+prove a noninterference property that lends credence to the language's claim to
+"safety." Furthermore, reviewer B had some questions about the "top" and "lost"
+qualifiers; we will certainly clarify the exposition here. Note that similar
+concepts are present in some ownership type systems, so we are confident that we
+can convey what is needed.
+
+> Lack of guarantees in approximate data (review B)
+
+The expectation of "best effort" accuracy, as opposed to specific guarantees, is
+important to the generality of our approach: it allows a single language
+extension to apply to a variety of approximation strategies. EnerJ addresses the
+first-order problem of distinguishing the part of the program that can be safely
+approximated. The question of the degree of approximation (how much error is
+allowable) is a subsequent concern that depends on the partitioning that EnerJ
+provides.
+
+> Algorithmic approximation in evaluation (review A)
+
+Reviewer A asked whether the results include the effect of algorithmic
+approximation. One program (jMonkeyEngine) as annotated does, in fact, include
+some limited algorithmic approximation for vector distance calculations. The
+paper's final version will clarify this.
+
+> Energy savings for mobile model (review A)
+
+The difference between the energy budget models for server (45% memory energy,
+reported in the paper) and mobile (25% memory) settings is small: the mean
+energy reduction is 23% under the server model and 22% for the mobile model.

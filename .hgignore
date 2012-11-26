@@ -1,0 +1,34 @@
+syntax: glob
+build
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/results/*.aux
+paper/results/*.log
+paper/results/showcase.pdf
+paper/results/tikzdict
+paper/results/Rplots.tex
+paper/results/.Rhistory
+paper/results/.RData
+paper/.exrc
+
+syntax: regexp
+^paper/epaj\.pdf$
+^paper/discussion\.pdf$
+^paper/ott_epaj\.pdf$
+^paper/ott_epaj_proofs\.pdf$
+^paper/ott_epaj\.tex$
+^paper/sigplanconf-guide\.pdf$
+^bin-eclipse$
+
+syntax: regexp
+\.class$
+
+syntax: regexp
+^paper/ott_epaj_include_all\.tex$
+syntax: regexp
+^paper/ott_epaj_proofs\.thm$
+syntax: regexp
+^paper/ott_epaj_sysdef\.tmp$

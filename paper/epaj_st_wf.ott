@@ -1,0 +1,255 @@
+defns 
+typerules :: '' ::= 
+
+defn
+Prg , sG |- e : T :: :: typerules :: tr_
+        {{ com expression typing }}
+        {{ tex [[sG]]\ [[|-]]\ [[e]]\ [[:]]\ [[T]] }}
+by
+
+Prg, sG |- e : T1  AND  Prg |- T1 <: T
+% Prg |- T OK: not needed in a WF Prg
+---------------------------------------------- :: subsum
+Prg, sG |- e : T
+
+
+Prg |- qC OK
+------------------------- :: null
+Prg, sG |- null : qC
+
+
+------------------------------ :: literal
+Prg, sG |- lit : precise P 
+
+
+sG(x) =o T
+---------------------- :: var
+Prg, sG |- x : T
+
+
+Prg |- q C OK
+q in {precise, approx, context}
+------------------------------------ :: new
+Prg, sG |- new q C() : T
+
+
+Prg, sG |- e0 : q C  AND  sFType(Prg, q C, f) =o T
+---------------------------------------------------- :: read
+Prg, sG |- e0.f : T
+
+
+Prg, sG |- e0 : q C  AND  sFType(Prg, q C, f) =o T
+lost notin T  AND  Prg, sG |- e1 : T
+--------------------------------------------------- :: write
+Prg, sG |- e0.f := e1 : T
+
+
+% Prg, sG |- e0 : qC   
+% sMSig(Prg, qC, m) =o T m( </ Ti pidi //i/> ) q
+% Prg, sG |-m </ ei //i/> : </ Ti //i/>
+% --------------------------------------------------- :: call
+% Prg, sG |- e0.m( </ ei //i/> ) : T
+
+Prg, sG |- e0 : q C  AND  q in {precise, context, top}   
+sMSig(Prg, precise C, m) =o T m( </ Ti pidi //i/> ) precise
+lost notin </ Ti //i/>  AND  Prg, sG |-m </ ei //i/> : </ Ti //i/>
+---------------------------------------------------------------- :: call1
+Prg, sG |- e0.m( </ ei //i/> ) : T
+
+
+Prg, sG |- e0 : approx C   
+sMSig(Prg, approx C, m) =o T m( </ Ti pidi //i/> ) approx
+lost notin </ Ti //i/>  AND  Prg, sG |-m </ ei //i/> : </ Ti //i/>
+---------------------------------------------------------------- :: call2
+Prg, sG |- e0.m( </ ei //i/> ) : T
+
+
+Prg, sG |- e0 : approx C
+sMSig(Prg, approx C, m) =o NoneMS
+sMSig(Prg, precise C, m) =o T m( </ Ti pidi //i/> ) precise
+lost notin </ Ti //i/>  AND  Prg, sG |-m </ ei //i/> : </ Ti //i/>
+---------------------------------------------------------------- :: call3
+Prg, sG |- e0.m( </ ei //i/> ) : T
+
+% We currently do not allow that there is only an approximate implementation
+% and no precise implementation.
+
+
+Prg, sG |- e : SomeT  AND  Prg |- q C OK
+------------------------------------------- :: cast
+Prg, sG |- (q C) e : T
+
+
+Prg, sG |- e0 : q P  AND  Prg, sG |- e1 : q P
+-------------------------------------------------- :: primop
+Prg, sG |- e0 + e1 : q P
+
+
+Prg, sG |- e0 : precise P  AND  Prg, sG |- e1 : T  AND  Prg, sG |- e2 : T
+---------------------------------------------- :: cond
+Prg, sG |- if ( e0 ) { e1 } else { e2 } : T
+
+
+
+defn
+Prg , sG |-m es : Ts :: :: typerulesmulti :: trm_
+        {{ com expression typings }}
+        {{ tex [[sG]]\ [[|-m]]\ [[es]]\ [[:]]\ [[Ts]] }}
+by
+
+</ Prg, sG |- ek : Tk //k/>
+---------------------------------------- :: def
+Prg, sG |-m </ ek //k/> : </ Tk //k/>
+
+
+
+%--------------------------------------------------------------------------------------------------------
+
+defns 
+wfstatic :: '' ::= 
+
+
+defn
+Prg |- T OK :: :: wftype :: wft_
+        {{ com well-formed type }}
+        {{ tex [[T]]\ \ [[OK]] }}
+by
+
+class C in Prg
+--------------------- :: refT
+Prg |- q C OK
+
+--------------------- :: primT
+Prg |- q P OK
+
+
+defn
+Prg |-m Ts OK :: :: wftypes :: wfts_
+        {{ com well-formed types }}
+        {{ tex [[Ts]]\ \ [[OK]] }}
+by
+
+</ Prg |- Tk OK //k/>
+--------------------------- :: def
+Prg |-m </ Tk //k/>  OK
+
+
+defn
+Prg |- Cls OK :: :: wfclass :: wfc_
+        {{ com well-formed class declaration }}
+        {{ tex [[Cls]]\ \ [[OK]] }}
+by
+
+sG = sGC( this |-> context Cid )
+Prg, sG |-m fds OK  AND  Prg, sG, Cid |-m mds OK
+class C in Prg
+--------------------------------------------------- :: def
+Prg |- class Cid extends C { fds mds } OK
+
+----------------------------- :: object
+Prg |- class Object {} OK
+
+
+
+defn
+Prg , sG |- T f ; OK  :: :: wffd :: wffd_
+        {{ com well-formed field declaration }}
+        {{ tex [[sG]]\ [[|-]]\ [[T]]\ [[f]][[;]]\ \ [[OK]] }}
+by
+
+Prg |- T OK
+--------------------------- :: def
+Prg, sG |- T f; OK
+
+
+
+defn
+Prg , sG |-m fds OK  :: :: wffds :: wffds_
+        {{ com well-formed field declarations }}
+        {{ tex [[sG]]\ [[|-m]]\ [[fds]]\ \ [[OK]] }}
+by
+
+</  Prg, sG |- Ti fi; OK  //i/>
+----------------------------------- :: def
+Prg, sG |-m </ Ti fi; //i/> OK
+
+
+
+defn
+Prg , sG , C |- md OK :: :: wfmd :: wfmd_
+        {{ com well-formed method declaration }}
+        {{ tex [[sG]], [[C]]\ [[|-]]\ [[md]]\ \ [[OK]] }}
+by
+
+sG = sGC( this |-> context C )
+sG' = sGC( this |-> context C, </ pidi |-> Ti //i/>)
+Prg |-m T, </ Ti //i/> OK  AND  Prg, sG' |- e : T  AND  Prg, C |- m OK
+q in {precise, approx}
+-------------------------------------------------------------------------- :: def
+Prg, sG, C |- T m( </ Ti pidi //i/> ) q { e } OK
+
+
+defn
+Prg , sG , C |-m mds OK  :: :: wfmds :: wfmds_
+        {{ com well-formed method declarations }}
+        {{ tex [[sG]], [[C]]\ [[|-m]]\ [[mds]]\ \ [[OK]] }}
+by
+
+</ Prg, sG, C |- mdk OK //k/>
+------------------------------- :: def
+Prg, sG, C |-m </ mdk //k/> OK
+
+
+defn
+Prg , C |- m OK  :: :: override :: ovr_
+        {{ com method overriding OK }}
+        {{ tex [[C]]\ [[|-]]\ [[m]]\ \ [[OK]] }}
+by
+
+% TODO: check for consistency between approx/precise implementation in the same class and superclasses
+Prg |- C [= C' => Prg, C, C' |- m OK
+------------------------------------------ :: def
+Prg, C |- m OK
+
+
+defn
+Prg , C , C' |- m OK  :: :: overrideaux :: ovra_
+        {{ com method overriding OK auxiliary }}
+        {{ tex [[C]], [[C']]\ [[|-]]\ [[m]]\ \ [[OK]] }}
+by
+
+
+sMSig(Prg, C, m, precise) =o ms0  /\  :formula_and: sMSig(Prg, C', m, precise) =o ms0' /\ (ms0' = NoneMS  \/  ms0 = ms0')
+sMSig(Prg, C, m, approx) =o ms1  /\  :formula_and: sMSig(Prg, C', m, approx) =o ms1' /\ (ms1' = NoneMS  \/  ms1 = ms1')
+sMSig(Prg, C, m, precise) =o ms2  /\  :formula_and: sMSig(Prg, C', m, approx) =o ms2'  /\ (ms2' = NoneMS \/ Prg |- ms2 <: ms2')
+% TODO: check handling of NoneMS
+------------------------------------------------------------------------------------------------------------------------------------ :: def
+Prg, C, C' |- m OK
+
+
+defn
+Prg |- sG OK    :: :: swfenv :: swfe_
+        {{ com well-formed static environment }}
+        {{ tex [[sG]]\ \ [[OK]] }}
+by
+
+sG = sGC( this |-> q C, </ pidi |-> Ti //i/> )
+Prg |-m q C, </ Ti //i/> OK
+-------------------------------------------------- :: def
+Prg |- sG OK
+
+
+
+defn
+|- Prg OK :: :: wfprg :: wfp_
+        {{ com well-formed program }}
+        {{ tex [[|-]]\ [[Prg]]\ \ [[OK]] }}
+by
+
+Prg = </ Clsi //i/>, C, e
+</ Prg |- Clsi OK //i/>  AND  Prg |- context C OK
+Prg, sGC(this |-> context C ) |- e : SomeT
+ALL C', C''. ((Prg |- C' [= C''  /\  Prg |- C'' [= C')  => C' = C'')
+------------------------------------------------------------------------------------------------------- :: def
+|- Prg OK
+

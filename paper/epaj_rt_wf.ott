@@ -1,0 +1,33 @@
+defns 
+wfruntime :: '' ::= 
+
+
+
+defn
+Prg |- h OK  :: :: wfheap :: wfh_
+        {{ com well-formed heap }}
+        {{ tex [[h]]\ \ [[OK]] }}
+by
+
+ALL ii in dom(h), f in h(ii)2. ( rFType(Prg, h, ii, f) =o T  /\  Prg, h, ii |- h(ii.f) : T )
+ALL ii in dom(h). ( Prg |- h(ii)1 OK  /\ TQual(h(ii)1) in {precise, approx})
+--------------------------------------------------------------------------------------------------- :: def
+Prg |- h OK
+% TODO: think about the use of FType and subtyping here, could T be top C and always pass?
+
+
+defn
+Prg |- h , rG : sG  :: :: wfenvs :: wfrse_
+        {{ com runtime and static environments correspond }}
+        {{ tex [[h]], [[rG]]\ [[:]]\ [[sG]]\ \ [[OK]] }}
+by
+
+% Using precise here restricts the possible executions.
+rG = rGC( precise; this |-> ii , </ pidi |-> vi //i/> )
+sG = sGC( this |-> context C, </ pidi |-> Ti //i/> )
+Prg |- h OK  AND  Prg |- sG OK
+% TODO: does this work?
+Prg, h, ii |- ii : context C
+Prg, h, ii |-m </ vi //i/> : </ Ti //i/>
+-------------------------------------------------------------------------- :: def
+Prg |- h, rG : sG

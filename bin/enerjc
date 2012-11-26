@@ -1,0 +1,12 @@
+#!/bin/sh
+
+jsr308c="javac -J-Xbootclasspath/p:$JSR308/checkers/binary/jsr308-all.jar"
+
+enerjdir=`dirname $0`/..
+enerjjar=$enerjdir/build/enerj.jar
+cfrtjar=$enerjdir/../checker-runtime/build/cfrt.jar
+enerjchecker=enerj.PrecisionChecker
+
+cp=$cfrtjar:$enerjjar
+command="$jsr308c -Xbootclasspath/p:$cp -processorpath $cp -processor $enerjchecker $*"
+exec $command

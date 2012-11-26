@@ -1,0 +1,18 @@
+#!/bin/sh
+
+jsr308jar=$JSR308/checkers/binary/jsr308-all.jar
+enerjdir=`dirname $0`/..
+enerjjar=$enerjdir/build/enerj.jar
+cfrtjar=$enerjdir/../checker-runtime/build/cfrt.jar
+
+jargs=
+for arg
+do
+    case "$arg" in
+    -noisy) jargs="$jargs -DPrecisionRuntime=enerj.rt.PrecisionRuntimeNoisy" ;;
+    *) jargs="$jargs $arg" ;;
+    esac
+done
+
+command="java -Xbootclasspath/a:$jsr308jar:$cfrtjar:$enerjjar $jargs"
+exec $command

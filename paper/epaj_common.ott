@@ -1,0 +1,195 @@
+indexvar i, j, k, n ::=  {{ com index variables as arbitrary elements }}
+
+
+grammar
+
+%%% TERMINALS %%%
+terminals :: termi_ ::=
+   | := ::  :: fieldupdate {{ tex := }}
+
+%%% SYNTAX %%%
+   |  class      :: :: class
+    {{ com keyword: class declaration }}
+    {{ tex \texttt{\upshape{class}\,\!} }}
+   |  extends    :: :: extends
+    {{ com keyword: super type declaration }}
+    {{ tex \texttt{\upshape{extends}\,\!} }}
+   |  new        :: :: new
+    {{ com keyword: object creation }}
+    {{ tex \texttt{\upshape{new}\,\!} }}
+   |  if        :: :: if
+    {{ com keyword: if }}
+    {{ tex \texttt{\upshape{if}\,\!} }}
+   |  else        :: :: else
+    {{ com keyword: else }}
+    {{ tex \texttt{\upshape{else}\,\!} }}
+   |  this       :: :: this
+    {{ com keyword: current object }}
+    {{ tex \texttt{\upshape{this}\,\!} }}
+   |  null       :: :: null
+    {{ com keyword: null value }}
+    {{ tex \texttt{\upshape{null}\,\!} }}
+    
+   |  +     :: :: primitiveop
+        {{ com syntax: primitive operation }}
+        {{ tex \oplus }}
+   |  {          :: :: cbs
+    {{ com syntax: start block }}
+    {{ tex \texttt{\{} }}
+   |  }          :: :: cbe
+    {{ com syntax: end block }}
+    {{ tex \texttt{\}\,} }}
+   |  (          :: :: bs
+    {{ com syntax: start parameters }}
+    {{ tex \texttt{(} }}
+   |  )          :: :: be
+    {{ com syntax: end parameters }}
+    {{ tex \texttt{)} }}
+   |  ;          :: :: semicolon
+    {{ com syntax: separator }}
+    {{ tex \texttt{;} }}
+   |  .          :: :: dot
+    {{ com syntax: selector }}
+    {{ tex \texttt{.} }}
+   |  :=          :: :: assign
+    {{ com syntax: assignment }}
+    {{ tex \texttt{=} }}
+
+   |  Object     :: :: Object
+    {{ com name of root class }}
+    {{ tex \texttt{\upshape{Object}\,\!} }}
+   |  int        :: :: int
+    {{ com name of primitive type }}
+    {{ tex \texttt{\upshape{int}\,\!} }}
+   |  lit        :: :: literal
+    {{ com primitive literal }}
+    {{ tex \mathcal{L} }}
+   |  <:q        :: :: qorder
+        {{ com ordering of precision qualifiers }}
+        {{ tex \textsf{$<:_{\mathrm q}$} }}
+   |  <:        :: :: sub
+        {{ com subtyping }}
+        {{ tex \textsf{$<:$} }}
+        
+%%% FORMULAS %%%
+   |  in         :: :: in
+    {{ com containment judgement }}
+    {{ tex \textsf{$\in$} }}
+   |  notin      :: :: notin
+    {{ com non-containment judgement }}
+    {{ tex \textsf{$\notin$} }}
+   |  |-         :: :: vdash
+    {{ com single element judgement }}
+    {{ tex \textsf{$\vdash$} }}
+   |  |-m        :: :: vdashs
+    {{ com multiple element judgement }}
+    {{ tex \textsf{$\vdash$} }}
+   |  :          :: :: colon
+    {{ com separator }}
+    {{ tex \textsf{:} }}
+
+   |  |->        :: :: mapsto
+    {{ com maps-to }}
+    {{ tex \mapsto }}
+   |  OK         :: :: OK
+    {{ com well-formedness judgement }}
+    {{ tex \textsf{OK} }}
+
+
+   |  =          :: :: alias
+    {{ com alias }}
+    {{ tex \textsf{=} }}
+   |  =o         :: :: optalias
+    {{ com option alias }}
+    {{ tex \textsf{=} }}
+   |  !=         :: :: notalias
+    {{ com not alias }}
+    {{ tex \textsf{$\not=$} }}
+   |  =m         :: :: aliass
+        {{ com multiple alias }}
+        {{ tex \textsf{=} }}
+
+   |  \/         :: :: or
+    {{ com logical or }}
+    {{ tex \textsf{$\vee$} }}
+   |  /\         :: :: and
+    {{ com logical and }}
+    {{ tex \textsf{$\wedge$} }}
+   |  AND         :: :: topand
+    {{ com top-level logical and }}
+   |  =>         :: :: implies
+    {{ com logical implication }}
+    {{ tex \textsf{$\implies$} }}
+
+
+%% RUNTIME %%%
+   |  nulla      :: :: nulla
+    {{ com special null address }}
+    {{ tex \texttt{\upshape{null$_a$}\,\!} }}
+   |  pp         :: :: primvalue
+    {{ com primitive values }}
+    {{ tex \rho }}
+   |  zero       :: :: zerovalue
+    {{ com zero value }}
+    {{ tex 0 }}
+    
+
+
+%%% FORMULA %%%
+  formula :: formula_ ::=           {{ com formulas }}
+   |  otherwise                     ::   :: otherwise
+    {{ com none of the previous rules applied }}
+    {{ tex \mathrm{otherwise} }}
+   |  judgement                     ::   :: judgement
+    {{ com judgement }}
+   |  formula1 , .. , formulak      ::   :: dots
+    {{ com sequence }}
+% sequence is used for </ formulak //k/> and the like
+   |  ( formula )                   ::   :: brackets
+    {{ com bracketed }}
+%    {{ tex \left([[formula]]\right) }}
+    {{ tex ([[formula]]) }}
+    {{ isa [[formula]] }}
+   |  ! formula                     ::   :: negation
+    {{ com negation }}
+    {{ tex ! [[formula]] }}
+    {{ isa ~[[formula]] }}
+   |  formula \/ formula'           ::   :: or
+    {{ com logical or }}
+    {{ tex [[formula]]\ \ [[\/]]\ \ [[formula']] }}
+    {{ isa [[formula]] \<or> [[formula']] }}
+   |  formula /\ formula'           ::   :: and
+    {{ com logical and }}
+    {{ tex [[formula]]\ \ [[/\]]\ \ [[formula']] }}
+    {{ isa [[formula]] \<and> [[formula']] }}
+   |  formula AND formula'           ::   :: topand
+    {{ com top-level logical and }}
+%   {{ tex [[formula]] [[AND]] [[formula']] }}
+    {{ tex \hfill [[formula]] \hfill\hspace{7mm plus 2mm minus 1mm}\hfill [[formula']]\hfill }}
+    {{ isa [[formula]] \<and> [[formula']] }}
+   |  formula => formula'           ::   :: implies
+    {{ com implies }}
+    {{ isa [[formula]] \<implies> [[formula']] }}
+   |  st_fmls                       ::   :: st_fml
+    {{ com static formulas }}
+   |  rt_fmls                       ::   :: rt_fml
+    {{ com runtime formulas }}
+   |  ALL f in fs . formula                        ::   :: allfields
+        % TODO: should be in st_fmls, but then ott complains :-(
+        {{ com for all [[f]] in [[fs]] holds [[formula]] }}
+        {{ tex \forall [[f]] \in [[fs]].\ [[formula]] }}
+   |  ALL C , C' . formula                         ::   :: allclasses
+        {{ com for all [[C]] and [[C']] holds [[formula]] }}
+        {{ tex \forall [[C]], [[C']].\ [[formula]] }}
+   |  ALL ii in iis . formula                      ::   :: alladdr
+        {{ com for all [[ii]] in [[iis]] holds [[formula]] }}
+        {{ tex \forall [[ii]] \in [[iis]].\ [[formula]] }}
+   |  ALL ii in iis , f in fvs . formula           ::   :: alladdrandfields
+        {{ com for all [[ii]] in [[iis]] and fields [[f]] in [[fvs]] holds [[formula]] }}
+        {{ tex \forall [[ii]] \in [[iis]], [[f]] \in [[fvs]].\ [[formula]] }}
+   |  h cong h'                                    ::   :: congh
+        {{ com two heaps are equal in their precise part }}
+        {{ tex [[h]] \cong [[h']] }}
+   |  v cong v'                                    ::   :: congv
+        {{ com two values are equal in their precise parts }}
+        {{ tex [[v]] \cong [[v']] }}

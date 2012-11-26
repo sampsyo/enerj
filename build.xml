@@ -1,0 +1,62 @@
+<project name="enerj" default="build">
+    <property name="build.dir" value="build" />
+    <property name="classes.dir" value="${build.dir}/classes" />
+    <property name="enerj.jar" value="${build.dir}/enerj.jar" />
+    <property name="src.dir" value="src" />
+
+    <!-- JSR308 support -->
+    <property environment="env" />
+    <property name="jsr308.dir" value="${env.JSR308}" />
+    <property name="jsr308.bin" value="${jsr308.dir}/checkers/binary" />
+    <property name="jsr308.jar" value="${jsr308.bin}/jsr308-all.jar" />
+    <presetdef name="jsr308.javac">
+        <javac fork="yes">
+            <compilerarg line="-J-Xbootclasspath/p:${jsr308.jar}" />
+        </javac>
+    </presetdef>
+    <presetdef name="jsr308.java">
+        <java fork="yes">
+            <jvmarg line="-Xbootclasspath/p:${jsr308.jar}" />
+        </java>
+    </presetdef>
+    <property name="checkers.tests" value="${jsr308.dir}/checkers/tests/src" />
+    <property name="junit.jar" value="${jsr308.dir}/checkers/tests/junit-4.7.jar" />
+
+    <!-- Checker framework runtime instrumentation library. Change this if the
+         repository is not in the same directory as enerj. -->
+    <property name="checker-runtime" value="../checker-runtime"/>
+    <property name="cfrt.jar" value="${checker-runtime}/build/cfrt.jar"/>
+
+    <!-- Plume. Downloaded from:
+         https://code.google.com/p/plume-lib/ -->
+    <property name="plume.jar" value="plume.jar" />
+    
+    <target name="build" depends="jar" />
+    <target name="compile">
+        <mkdir dir="${classes.dir}" />
+        <jsr308.javac
+            srcdir="${src.dir}"
+            destdir="${classes.dir}"
+            excludes="**/PrecisionTests.*"
+            classpath="${junit.jar}:${cfrt.jar}:${plume.jar}" />
+    </target>
+    <target name="jar" depends="compile">
+        <jar destfile="${enerj.jar}">
+            <fileset dir="${classes.dir}" includes="**/*.class" />
+            <fileset dir="${src.dir}" includes="**/*.properties" />
+        </jar>
+    </target>
+    
+    <target name="test" depends="jar">
+        <jsr308.java classname="enerj.PrecisionTests">
+            <classpath>
+                <pathelement location="${junit.jar}" />
+                <pathelement location="${enerj.jar}" />
+            </classpath>
+        </jsr308.java>
+    </target>
+    
+    <target name="clean">
+        <delete dir="${build.dir}" />
+    </target>
+</project>

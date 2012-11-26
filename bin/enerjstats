@@ -1,0 +1,6 @@
+#!/bin/sh
+
+enerjdir=`dirname $0`/..
+script=$enerjdir/analyze/readstats.py
+
+exec python $script $*

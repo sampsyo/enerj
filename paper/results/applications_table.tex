@@ -1,0 +1,20 @@
+
+\begin{tabular}{l >{\raggedright}p{1.35in} >{\raggedright}p{1.25in} r r r r r}
+& & & \multicolumn{1}{c}{Lines} & \multicolumn{1}{c}{Proportion} &
+\multicolumn{1}{c}{Total} & \multicolumn{1}{c}{Annotated} &
+\multicolumn{1}{c}{Endorse-} \tabularnewline
+Application & Description & Error metric &
+\multicolumn{1}{c}{of code} & \multicolumn{1}{c}{FP} &
+\multicolumn{1}{c}{decls.} &
+\multicolumn{1}{c}{decls.} & \multicolumn{1}{c}{ments} \tabularnewline
+\hline
+FFT & \multirow{5}{1.5in}{Scientific kernels from the SciMark2 benchmark} & Mean entry difference  & 168 & 38.2\% & 85 & 33\% & 2 \tabularnewline
+SOR & & Mean entry difference  & 36 & 55.2\% & 28 & 25\% & 0 \tabularnewline
+MonteCarlo & & Normalized difference  & 59 & 22.9\% & 15 & 20\% & 1 \tabularnewline
+SparseMatMult & & Mean normalized difference  & 38 & 39.7\% & 29 & 14\% & 0 \tabularnewline
+LU & & Mean entry difference  & 283 & 31.4\% & 150 & 23\% & 3 \tabularnewline[1.5ex]
+ZXing & Smartphone bar code decoder & 1 if incorrect, 0 if correct  & 26171 & 1.7\% & 11506 & 4\% & 247 \tabularnewline
+jMonkeyEngine & Mobile/desktop game engine & Fraction of correct decisions normalized to 0.5  & 5962 & 44.3\% & 2104 & 19\% & 63 \tabularnewline
+ImageJ & Raster image manipulation & Mean pixel difference  & 156 & 0.0\% & 118 & 34\% & 18 \tabularnewline
+Raytracer & 3D image renderer & Mean pixel difference  & 174 & 68.4\% & 92 & 33\% & 10 \tabularnewline
+\end{tabular}
