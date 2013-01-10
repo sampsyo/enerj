@@ -4,6 +4,7 @@ jsr308jar=$JSR308/checkers/binary/jsr308-all.jar
 enerjdir=`dirname $0`/..
 enerjjar=$enerjdir/build/enerj.jar
 cfrtjar=$enerjdir/../checker-runtime/build/cfrt.jar
+plumejar=$enerjdir/plume.jar
 
 jargs=
 for arg
@@ -14,5 +15,5 @@ do
     esac
 done
 
-command="java -Xbootclasspath/a:$jsr308jar:$cfrtjar:$enerjjar $jargs"
+command="java -Xbootclasspath/a:$jsr308jar:$cfrtjar:$enerjjar:$plumejar $jargs"
 exec $command
