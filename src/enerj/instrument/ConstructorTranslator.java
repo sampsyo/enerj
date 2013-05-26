@@ -33,6 +33,11 @@ public class ConstructorTranslator
     public void visitClassDef(JCTree.JCClassDecl cls) {
         super.visitClassDef(cls);
 
+        // Check for the kinds of classes that can't have methods.
+        if ((cls.sym.flags_field & (Flags.INTERFACE | Flags.ENUM)) != 0) {
+            return;
+        }
+
         // Get the Type of the CONSTRUCTOR_MARKER_CLASS.
         JCTree.JCExpression instExp =
             dotsExp(CONSTRUCTOR_MARKER_CLASS + ".inst");
