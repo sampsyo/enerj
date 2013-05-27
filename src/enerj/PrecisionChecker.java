@@ -131,7 +131,7 @@ public class PrecisionChecker extends InstrumentingChecker {
 			// finally look what to simulate
 			if (getLintOption(PrecisionChecker.SIMULATION, PrecisionChecker.SIMULATION_DEFAULT)) {
 				tree.accept(new SimulationTranslator(this, processingEnv, p));
-                tree.accept(new ConstructorTranslator(this, processingEnv, p));
+                // tree.accept(new ConstructorTranslator(this, processingEnv, p));
 			}
 		}
 
