@@ -27,6 +27,8 @@ Then get the [EnerJ source][] (this package) and the [CF runtime library][]. (Yo
 
 Expand both packages into a common directory. First, build the checker-runtime library against the Checker Framework by typing `ant` in its directory. Then build EnerJ the same way.
 
+If you have trouble with the build—for example, if ant complains about a missing tools.jar or compiler-related classes, be sure to set your `$JAVA_HOME` environment variable to point at the appropriate place. (Exactly where depends on your OS and JDK installation.)
+
 
 Using the Compiler
 ------------------
