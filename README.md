@@ -17,7 +17,7 @@ Compiling EnerJ
 
 To use the system, first download and install the [Checker Framework][], which adds JSR 308 type annotations to Java. Be sure to get [version 1.3.1][]. Set the JSR308 environment variable to point to the directory containing the CF's checkers directory; the EnerJ build files will look for this variable.
 
-Then get the [EnerJ source][] (this package) and the [CF runtime library][]. (You can also clone the source as Mercurial repositories [from BitBucket][bb]. Look for the "enerj" and "checker-runtime" repositories on my page.)
+Then get the [EnerJ source][] (this package) and the [CF runtime library][]. You can also clone the source as Mercurial repositories [from BitBucket][bb]. Look for the "enerj" and "checker-runtime" repositories on my page.
 
 [bb]: https://bitbucket.org/adrian
 [CF runtime library]: https://bitbucket.org/adrian/checker-runtime/get/tip.tar.bz2
@@ -25,7 +25,7 @@ Then get the [EnerJ source][] (this package) and the [CF runtime library][]. (Yo
 [version 1.3.1]: http://types.cs.washington.edu/checker-framework/releases/1.3.1/checkers.zip
 [Checker Framework]: http://types.cs.washington.edu/checker-framework/
 
-Expand both packages into a common directory. First, build the checker-runtime library against the Checker Framework by typing `ant` in its directory. Then build EnerJ the same way.
+Expand both packages into a common directory. Make sure the directories are named "enerj" and "checker-runtime" and are siblings in the directory tree. First, build the checker-runtime library against the Checker Framework by typing `ant` in its directory. Then build EnerJ the same way.
 
 If you have trouble with the build—for example, if ant complains about a missing tools.jar or compiler-related classes, be sure to set your `$JAVA_HOME` environment variable to point at the appropriate place. (Exactly where depends on your OS and JDK installation.)
 
